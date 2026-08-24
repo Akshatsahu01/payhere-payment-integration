@@ -37,27 +37,27 @@ Developers need a working reference for securely generating PayHere hashes on a 
 
 ## 5. Current MVP Requirements
 
-| ID | Requirement | Acceptance criteria |
-|---|---|---|
-| MVP-01 | Payment start | Clicking the payment button requests a hash from `POST /payment/start`. |
-| MVP-02 | Hash security | The merchant secret is used only by the backend to generate the hash. |
-| MVP-03 | PayHere checkout | The frontend starts PayHere with sandbox mode and the returned hash. |
+| ID     | Requirement               | Acceptance criteria                                                           |
+| ------ | ------------------------- | ----------------------------------------------------------------------------- |
+| MVP-01 | Payment start             | Clicking the payment button requests a hash from `POST /payment/start`.       |
+| MVP-02 | Hash security             | The merchant secret is used only by the backend to generate the hash.         |
+| MVP-03 | PayHere checkout          | The frontend starts PayHere with sandbox mode and the returned hash.          |
 | MVP-04 | Notification verification | `POST /payment/notify` recomputes `md5sig` and accepts only valid status `2`. |
-| MVP-05 | Local setup | README instructions start the backend on `5001` and frontend on `3000`. |
-| MVP-06 | Public notification | Documentation explains that PayHere must reach the notify URL publicly. |
+| MVP-05 | Local setup               | README instructions start the backend on `5001` and frontend on `3000`.       |
+| MVP-06 | Public notification       | Documentation explains that PayHere must reach the notify URL publicly.       |
 
 ## 6. Next Release Requirements
 
-| Priority | Requirement | Acceptance criteria |
-|---|---|---|
-| P0 | Environment configuration | Credentials and URLs load from environment variables; no secrets are committed. |
-| P0 | Order persistence | An order is stored before checkout and its state changes only after verified notification. |
-| P0 | Input validation | Invalid order IDs, amounts, currencies, and missing fields receive a clear `4xx` response. |
-| P0 | Idempotency | Repeated notifications do not duplicate fulfillment or alter a completed order incorrectly. |
-| P1 | Result pages | Success, cancel, and failure states are visible in the frontend. |
-| P1 | User feedback | Loading, API failure, and payment failure states are visible and actionable. |
-| P1 | Test coverage | Hash, notification, API validation, and payment-start flows have automated tests. |
-| P2 | Operations | Add structured logs, request IDs, metrics, alerts, and a health endpoint. |
+| Priority | Requirement               | Acceptance criteria                                                                         |
+| -------- | ------------------------- | ------------------------------------------------------------------------------------------- |
+| P0       | Environment configuration | Credentials and URLs load from environment variables; no secrets are committed.             |
+| P0       | Order persistence         | An order is stored before checkout and its state changes only after verified notification.  |
+| P0       | Input validation          | Invalid order IDs, amounts, currencies, and missing fields receive a clear `4xx` response.  |
+| P0       | Idempotency               | Repeated notifications do not duplicate fulfillment or alter a completed order incorrectly. |
+| P1       | Result pages              | Success, cancel, and failure states are visible in the frontend.                            |
+| P1       | User feedback             | Loading, API failure, and payment failure states are visible and actionable.                |
+| P1       | Test coverage             | Hash, notification, API validation, and payment-start flows have automated tests.           |
+| P2       | Operations                | Add structured logs, request IDs, metrics, alerts, and a health endpoint.                   |
 
 ## 7. Non-Functional Requirements
 
