@@ -38,13 +38,13 @@ flowchart LR
 
 ## 4. Main Components
 
-| Component | Responsibility | Technology |
-|---|---|---|
-| Frontend shell | Renders the payment page | React 18, Create React App |
-| `PaymentButton` | Builds the demo payment, requests a hash, starts PayHere | React, Fetch API |
-| Backend application | JSON and URL-encoded parsing, CORS, route registration | Node.js, Express |
-| Payment route | Hash generation and notification verification | Express Router, Node `crypto` |
-| PayHere SDK | Hosted payment checkout and notification delivery | PayHere JavaScript SDK |
+| Component           | Responsibility                                           | Technology                    |
+| ------------------- | -------------------------------------------------------- | ----------------------------- |
+| Frontend shell      | Renders the payment page                                 | React 18, Create React App    |
+| `PaymentButton`     | Builds the demo payment, requests a hash, starts PayHere | React, Fetch API              |
+| Backend application | JSON and URL-encoded parsing, CORS, route registration   | Node.js, Express              |
+| Payment route       | Hash generation and notification verification            | Express Router, Node `crypto` |
+| PayHere SDK         | Hosted payment checkout and notification delivery        | PayHere JavaScript SDK        |
 
 ## 5. Primary Flow
 

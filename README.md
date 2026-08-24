@@ -1,108 +1,140 @@
+# PayHere Payment Integration
 
-# PayHere Payment Integration Demo
+A simple PayHere sandbox payment integration using a React frontend and an Express.js backend. The backend generates the PayHere payment hash and verifies server-to-server payment notifications.
 
-## [Article on How to implement this A-Z: Medium](https://medium.com/@madhurajayashanka/how-to-integrate-payhere-payment-gateway-in-react-js-and-node-js-d4ba06443821)
+## Project Structure
 
-![Thumbnail](https://github.com/madhurajayashanka/payhere-reactjs-expressjs/blob/f674a5062b892c566a245cbe03c008fcbef98e9d/thumbnail.png)
+```text
+.
+├── backend/
+│   ├── app.js
+│   ├── package.json
+│   └── routes/payment.js
+└── frontend/
+		├── public/index.html
+		├── package.json
+		└── src/
+				├── App.js
+				└── components/PaymentButton.js
+```
 
+## How It Works
 
-This project demonstrates a simple payment integration using the PayHere payment gateway. The application consists of a Node.js backend with Express and a React.js frontend. The integration is tested using the PayHere [sandbox](https://sandbox.payhere.lk/merchant/sign-up) environment.
+1. The user clicks **PayHere Pay** in the React application.
+2. The frontend sends the order amount and currency to `POST /payment/start`.
+3. The Express backend generates the PayHere MD5 payment hash.
+4. The frontend starts the PayHere sandbox checkout using the returned hash.
+5. PayHere sends the payment result to `POST /payment/notify`.
+6. The backend verifies the notification signature and accepts successful payments with status code `2`.
 
-### Installation
+The PayHere JavaScript SDK is loaded in `frontend/public/index.html`.
 
-1. **Clone the repository**:
+## Requirements
 
-    ```bash
-    git clone https://github.com/madhurajayashanka/payhere-reactjs-expressjs.git
-    cd payhere-reactjs-expressjs
-    ```
+- Node.js and npm
+- A PayHere sandbox merchant account for testing
+- A publicly reachable notification URL for PayHere callbacks
 
-2. **Install dependencies for backend**:
+## Installation
 
-    ```bash
-    cd backend
-    npm install
-    ```
+Install dependencies in both applications:
 
-3. **Install dependencies for frontend**:
+```bash
+cd backend
+npm install
 
-    ```bash
-    cd ../frontend
-    npm install
-    ```
+cd ../frontend
+npm install
+```
 
-## Configuration
+## Running Locally
 
-### PayHere Sandbox Setup
+Open two terminals from the repository root.
 
-1. **Sign Up on PayHere Sandbox**:
+Start the backend:
 
-   Visit the [PayHere Sandbox](https://sandbox.payhere.lk/) and create an account.
+```bash
+cd backend
+npm start
+```
 
-2. **Create a New Merchant**:
+The backend runs on `http://localhost:5001` by default. Set the `PORT` environment variable to use another port.
 
-   - After signing in, navigate to the **Merchant** section.
-   - Create a new merchant account.
-   - Note down the **Merchant ID** and **Merchant Secret** provided.
+Start the frontend:
 
-  ![Merchant Panel](https://github.com/madhurajayashanka/payhere-reactjs-expressjs/blob/aed71726b0bb05b443ba388261c162c13d84d931/credentials.png)
+```bash
+cd frontend
+npm start
+```
 
-3. **Configure Notify URL**:
+The React application opens at `http://localhost:3000`.
 
-   - For payment notifications, you need a publicly accessible URL for your backend. Use a tool like [ngrok](https://ngrok.com/) to expose your localhost or deploy your backend on a public server (AWS/ Digital Ocean/ Azure).
-   - Set the **Notify URL** in your PayHere merchant settings to the publicly accessible endpoint (e.g., `https://sea-lion-app-qfh5d.ondigitalocean.app/payment/notify`).
+## API Endpoints
 
-### Environment Variables
+### `POST /payment/start`
 
-1. **Backend Configuration**:
+Generates a PayHere payment hash.
 
-   Replace the `merchant_id` and `merchant_secret` in the backend code with the values obtained from PayHere Sandbox.
+Example request:
 
+```json
+{
+  "order_id": "ItemNo12345",
+  "amount": "1005.00",
+  "currency": "LKR"
+}
+```
 
-   - Open `backend/routes/payment.js` and replace the placeholders:
+Example response:
 
-     ```javascript
-     const merchant_id = "YOUR_MERCHANT_ID";
-     const merchant_secret = "YOUR_MERCHANT_SECRET";
-     ```
-   ![Merchant Panel](https://github.com/madhurajayashanka/payhere-reactjs-expressjs/blob/f674a5062b892c566a245cbe03c008fcbef98e9d/replacing-credentials.png)
+```json
+{
+  "hash": "UPPERCASE_MD5_HASH",
+  "merchant_id": "12345684"
+}
+```
 
+### `POST /payment/notify`
 
-## Running the Application
+Receives PayHere URL-encoded payment notifications. The backend recomputes `md5sig` using the merchant secret and responds with:
 
-1. **Start the Backend Server**:
+- `200` when the signature is valid and `status_code` is `2`.
+- `400` when verification fails or the payment is not successful.
 
-   ```bash
-   cd backend
-   npm start
-   ```
+PayHere must be able to reach this endpoint over the public internet. `localhost` cannot be used as the notification URL.
 
-   The backend server will run on `http://localhost:5001`. 
-   If you deployed the NodeJs backend, use that link.
+## Current Demo Configuration
 
-2. **Start the Frontend Development Server**:
+The current frontend uses these values:
 
-   ```bash
-   cd ../frontend
-   npm start
-   ```
+- PayHere sandbox mode: enabled
+- Demo order: `ItemNo12345`
+- Amount: `1005.00 LKR`
+- Backend hash URL: `https://sea-lion-app-qfh5d.ondigitalocean.app/payment/start`
+- Backend notification URL: `https://sea-lion-app-qfh5d.ondigitalocean.app/payment/notify`
+- Local return URL: `http://localhost:3000/payment/success`
+- Local cancel URL: `http://localhost:3000/payment/cancel`
 
-   The frontend development server will run on `http://localhost:3000`.
+Update `frontend/src/components/PaymentButton.js` when using a different backend or order.
 
-3. **Access the Application**:
+## Security Notes
 
-   Open your browser and go to `http://localhost:3000` to access the payment integration page.
+The current demo contains merchant credentials in `backend/routes/payment.js`. Before deploying or sharing this project:
 
+- Rotate any exposed merchant credentials.
+- Store `merchant_id` and `merchant_secret` in backend environment variables or a secret manager.
+- Never send the merchant secret to the browser or commit it to source control.
+- Validate order IDs, amounts, currencies, and customer data on the backend.
+- Use the verified PayHere notification as the source of truth for fulfillment.
+- Add persistent order storage and idempotent notification handling before production use.
+- Use HTTPS and restrict CORS to the deployed frontend origin.
 
+## Documentation
 
-## Screenshots
+- [High-Level Design](HHL.md)
+- [Low-Level Design](LLD.md)
+- [Product Requirements Document](PRD.md)
 
-![Thumbnail](https://github.com/madhurajayashanka/payhere-reactjs-expressjs/blob/f674a5062b892c566a245cbe03c008fcbef98e9d/thumbnail.png)
-![Transactions](https://github.com/madhurajayashanka/payhere-reactjs-expressjs/blob/f674a5062b892c566a245cbe03c008fcbef98e9d/transactions.png)
+## License
 
-
-
-### Additional Notes
-
-- **Public IP Requirement**: Remember, PayHere requires a public IP for the `notify_url`. Tools like ngrok can be used during development to expose your local backend.
-- **Security**: Ensure that sensitive information like the `merchant_secret` is handled securely, especially in production environments.
+This project is provided for demonstration and educational purposes.
